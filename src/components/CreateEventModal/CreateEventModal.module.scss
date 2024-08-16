@@ -1,0 +1,20 @@
+.datePicker {
+    width: 100%;
+    border: 1px solid;
+    border-color: inherit;
+    padding-left: 8px;
+    font-size: var(--input-font-size);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.errorMessage {
+    color: red;
+    background-color: lightcoral;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
