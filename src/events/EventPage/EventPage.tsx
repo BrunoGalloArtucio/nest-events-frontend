@@ -1,9 +1,18 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEvent } from "../../api/events";
-import { useEffect, useState } from "react";
+import { useAttendEvent, useEvent, useEventAttendance } from "../../api/events";
+import { useCallback, useEffect, useState } from "react";
 import { useMinDelay } from "../../common/hooks/use-min-delay";
-import { Heading, Stack, Skeleton, Flex, Text } from "@chakra-ui/react";
-import { Event } from "../../types/events";
+import {
+    Heading,
+    Stack,
+    Skeleton,
+    Flex,
+    Text,
+    RadioGroup,
+    Radio,
+} from "@chakra-ui/react";
+import { AttendeeAnswerEnum, Event } from "../../types/events";
+import { useAuthData } from "../../auth/redux";
 
 export default function EventPage() {
     const params = useParams<{ eventId: string }>();
@@ -29,6 +38,9 @@ export default function EventPage() {
                 <Skeleton h={32} isLoaded={isLoaded} fadeDuration={0.5}>
                     {event && <EventComponent event={event} />}
                 </Skeleton>
+                {eventId !== undefined ? (
+                    <EventAttendance eventId={eventId} />
+                ) : null}
             </Stack>
         </Flex>
     );
@@ -51,6 +63,79 @@ function EventComponent({ event }: EventProps) {
                 </Flex>
             </Flex>
             <Text>{event.description}</Text>
+        </Flex>
+    );
+}
+
+interface EventAttendanceProps {
+    eventId: number;
+}
+
+function EventAttendance({ eventId }: EventAttendanceProps) {
+    const authData = useAuthData();
+    const {
+        data: attendance,
+        isPending,
+        isSuccess,
+    } = useEventAttendance(eventId, authData?.userId);
+
+    const { mutateAsync: attendEvent } = useAttendEvent(eventId);
+
+    const isLoaded = useMinDelay(700, !isPending || isSuccess);
+
+    const onAttendanceChange = useCallback(
+        async (newAttendance: string) => {
+            console.log(
+                `newAttendance: ${typeof newAttendance} - ${newAttendance}`
+            );
+            console.log(`attendance: ${typeof attendance} - ${attendance}`);
+            if (String(attendance) === newAttendance) {
+                return;
+            }
+            await attendEvent({ answer: Number(newAttendance) });
+        },
+        [attendEvent, attendance]
+    );
+
+    const options = [
+        { value: String(AttendeeAnswerEnum.Accepted), label: "Yes" },
+        { value: String(AttendeeAnswerEnum.Maybe), label: "Maybe" },
+        { value: String(AttendeeAnswerEnum.Rejected), label: "No" },
+    ];
+
+    if (!authData) {
+        return null;
+    }
+
+    console.log(`attendance: ${attendance}`);
+
+    return (
+        <Flex flexDir="row">
+            <Skeleton h={8} isLoaded={isLoaded} fadeDuration={0.5}>
+                <Flex bg="yellow.100" flexDir="column" gap={2}>
+                    <Text>Are you attending?</Text>
+                    <RadioGroup onChange={onAttendanceChange}>
+                        <Stack direction="row">
+                            {options.map(({ label, value }) => {
+                                console.log(
+                                    `isChecked ${value}: ${
+                                        value === String(attendance)
+                                    }`
+                                );
+                                return (
+                                    <Radio
+                                        key={value}
+                                        value={value}
+                                        isChecked={value === String(attendance)}
+                                    >
+                                        {label}
+                                    </Radio>
+                                );
+                            })}
+                        </Stack>
+                    </RadioGroup>
+                </Flex>
+            </Skeleton>
         </Flex>
     );
 }

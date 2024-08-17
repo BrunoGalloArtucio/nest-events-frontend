@@ -1,7 +1,7 @@
-import { Event } from "../../types/events";
+import { Event } from "../types/events";
 import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
-import Pagination from "../Pagination/Pagination";
+import Pagination from "./Pagination/Pagination";
 import { Flex, Text } from "@chakra-ui/react";
 
 interface EventListProps {

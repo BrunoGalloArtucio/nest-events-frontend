@@ -1,5 +1,5 @@
 export type AuthData = {
-    userId: string;
+    userId: number;
     token: string;
     firstName: string;
     lastName: string;

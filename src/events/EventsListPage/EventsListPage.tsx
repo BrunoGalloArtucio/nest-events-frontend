@@ -1,6 +1,6 @@
 import { useEvents } from "../../api/events";
 import { usePageParam } from "../../common/hooks/use-page-param";
-import EventList from "../../components/EventList/EventList";
+import EventList from "../../components/EventList";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Box, Stack, Heading, Skeleton } from "@chakra-ui/react";
