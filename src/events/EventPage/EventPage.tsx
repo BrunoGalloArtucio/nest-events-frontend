@@ -8,11 +8,12 @@ import {
     Skeleton,
     Flex,
     Text,
-    RadioGroup,
-    Radio,
+    useRadioGroup,
+    HStack,
 } from "@chakra-ui/react";
 import { AttendeeAnswerEnum, Event } from "../../types/events";
 import { useAuthData } from "../../auth/redux";
+import { RadioCard } from "../../components/RadioCard";
 
 export default function EventPage() {
     const params = useParams<{ eventId: string }>();
@@ -33,9 +34,9 @@ export default function EventPage() {
     const isLoaded = useMinDelay(700, !isPending || isSuccess);
 
     return (
-        <Flex flexDir="column" alignItems="center" gap={4} pt={8}>
-            <Stack w="75%">
-                <Skeleton h={32} isLoaded={isLoaded} fadeDuration={0.5}>
+        <Flex flexDir="column" alignItems="center" pt={8}>
+            <Stack w="75%" gap={4}>
+                <Skeleton maxH={32} isLoaded={isLoaded} fadeDuration={0.5}>
                     {event && <EventComponent event={event} />}
                 </Skeleton>
                 {eventId !== undefined ? (
@@ -79,16 +80,45 @@ function EventAttendance({ eventId }: EventAttendanceProps) {
         isSuccess,
     } = useEventAttendance(eventId, authData?.userId);
 
-    const { mutateAsync: attendEvent } = useAttendEvent(eventId);
-
     const isLoaded = useMinDelay(700, !isPending || isSuccess);
+
+    if (!authData) {
+        return null;
+    }
+
+    return (
+        <Flex flexDir="row">
+            <Skeleton h={20} isLoaded={isLoaded} fadeDuration={0.5}>
+                {isSuccess && (
+                    <EventAttendanceComponent
+                        eventId={eventId}
+                        attendance={attendance}
+                    />
+                )}
+            </Skeleton>
+        </Flex>
+    );
+}
+
+const options = [
+    { value: String(AttendeeAnswerEnum.Accepted), label: "Yes" },
+    { value: String(AttendeeAnswerEnum.Maybe), label: "Maybe" },
+    { value: String(AttendeeAnswerEnum.Rejected), label: "No" },
+];
+
+interface EventAttendanceComponentProps {
+    eventId: number;
+    attendance: AttendeeAnswerEnum | undefined;
+}
+
+function EventAttendanceComponent({
+    attendance,
+    eventId,
+}: EventAttendanceComponentProps) {
+    const { mutateAsync: attendEvent } = useAttendEvent(eventId);
 
     const onAttendanceChange = useCallback(
         async (newAttendance: string) => {
-            console.log(
-                `newAttendance: ${typeof newAttendance} - ${newAttendance}`
-            );
-            console.log(`attendance: ${typeof attendance} - ${attendance}`);
             if (String(attendance) === newAttendance) {
                 return;
             }
@@ -97,45 +127,27 @@ function EventAttendance({ eventId }: EventAttendanceProps) {
         [attendEvent, attendance]
     );
 
-    const options = [
-        { value: String(AttendeeAnswerEnum.Accepted), label: "Yes" },
-        { value: String(AttendeeAnswerEnum.Maybe), label: "Maybe" },
-        { value: String(AttendeeAnswerEnum.Rejected), label: "No" },
-    ];
+    const { getRootProps, getRadioProps } = useRadioGroup({
+        name: "attendance",
+        defaultValue: attendance ? String(attendance) : "",
+        onChange: onAttendanceChange,
+    });
 
-    if (!authData) {
-        return null;
-    }
-
-    console.log(`attendance: ${attendance}`);
+    const group = getRootProps();
 
     return (
-        <Flex flexDir="row">
-            <Skeleton h={8} isLoaded={isLoaded} fadeDuration={0.5}>
-                <Flex bg="yellow.100" flexDir="column" gap={2}>
-                    <Text>Are you attending?</Text>
-                    <RadioGroup onChange={onAttendanceChange}>
-                        <Stack direction="row">
-                            {options.map(({ label, value }) => {
-                                console.log(
-                                    `isChecked ${value}: ${
-                                        value === String(attendance)
-                                    }`
-                                );
-                                return (
-                                    <Radio
-                                        key={value}
-                                        value={value}
-                                        isChecked={value === String(attendance)}
-                                    >
-                                        {label}
-                                    </Radio>
-                                );
-                            })}
-                        </Stack>
-                    </RadioGroup>
-                </Flex>
-            </Skeleton>
+        <Flex borderRadius={8} bg="yellow.100" flexDir="column" gap={2} p={4}>
+            <Text>Are you attending?</Text>
+            <HStack {...group}>
+                {options.map(({ value, label }) => {
+                    const radio = getRadioProps({ value });
+                    return (
+                        <RadioCard key={value} {...radio}>
+                            {label}
+                        </RadioCard>
+                    );
+                })}
+            </HStack>
         </Flex>
     );
 }

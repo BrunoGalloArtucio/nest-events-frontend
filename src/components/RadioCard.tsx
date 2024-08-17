@@ -1,6 +1,17 @@
 import { Box, useRadio } from "@chakra-ui/react";
+import * as _chakra_ui_react_types from "@chakra-ui/react-types";
 
-export function RadioCard(props) {
+export function RadioCard(
+    props: _chakra_ui_react_types.InputDOMProps &
+        React.AriaAttributes &
+        React.DOMAttributes<HTMLInputElement> &
+        _chakra_ui_react_types.DataAttributes & {
+            id?: string;
+            role?: React.AriaRole;
+            tabIndex?: number;
+            style?: React.CSSProperties;
+        }
+) {
     const { getInputProps, getRadioProps } = useRadio(props);
 
     const input = getInputProps();
@@ -17,6 +28,7 @@ export function RadioCard(props) {
                 borderWidth="1px"
                 borderRadius="md"
                 boxShadow="md"
+                bg="white"
                 _checked={{
                     bg: "teal.600",
                     color: "white",
@@ -25,8 +37,8 @@ export function RadioCard(props) {
                 _focus={{
                     boxShadow: "outline",
                 }}
-                px={5}
-                py={3}
+                px={1}
+                py={1}
             >
                 {props.children}
             </Box>
