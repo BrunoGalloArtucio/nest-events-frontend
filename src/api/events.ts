@@ -73,7 +73,7 @@ export function useEventAttendance(eventId: number, userId?: number) {
                 return answer;
             } catch (err) {
                 if (err instanceof ApiError && err.statusCode === 404) {
-                    return undefined;
+                    return null;
                 }
                 throw err;
             }

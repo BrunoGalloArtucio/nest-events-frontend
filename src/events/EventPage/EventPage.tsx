@@ -108,7 +108,7 @@ const options = [
 
 interface EventAttendanceComponentProps {
     eventId: number;
-    attendance: AttendeeAnswerEnum | undefined;
+    attendance: AttendeeAnswerEnum | null;
 }
 
 function EventAttendanceComponent({
@@ -137,7 +137,9 @@ function EventAttendanceComponent({
 
     return (
         <Flex borderRadius={8} bg="yellow.100" flexDir="column" gap={2} p={4}>
-            <Text>Are you attending?</Text>
+            <Text as="b" fontSize="lg">
+                Are you attending?
+            </Text>
             <HStack {...group}>
                 {options.map(({ value, label }) => {
                     const radio = getRadioProps({ value });

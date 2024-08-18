@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useMinDelay(minDelayMs: number, value: boolean) {
-    const [wasDelayElapsed, setWasDelayedElapsed] = useState<boolean>();
+    const [wasDelayElapsed, setWasDelayedElapsed] = useState<boolean>(value);
 
     useEffect(() => {
         const timeout = setTimeout(
